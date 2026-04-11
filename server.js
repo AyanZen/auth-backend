@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import rateLimit from "express-rate-limit";
+
 
 dotenv.config({
     path: "./.env"
@@ -15,6 +17,20 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
+const limiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 400,
+    message: "Too many requests from this IP, please try again after 5 minutes",
+});
+
+const authLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 10,
+    message: "Too many requests from this IP, please try again after 5 minutes",
+})
+
+app.use(limiter);
+app.use("/api/auth", authLimiter);
 
 app.use("/api/auth", authRoutes);
 
